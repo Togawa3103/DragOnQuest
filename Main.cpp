@@ -43,7 +43,7 @@ int old_Player_Y = Player_Y;
 int Select_Menu_Num = 0;
 int Select_Dire_Num = 0;
 int Select_Item=0; 
-std::vector<int> ItemBox = {0,1,2,3,4}; //‚à‚¿‚à‚Ì
+std::vector<int> ItemBox = {0,1,2,4}; //‚à‚¿‚à‚Ì
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ChangeWindowMode(TRUE);
     SetGraphMode(600, 500, 32);
@@ -404,10 +404,10 @@ void Item_Select() {
             if (ItemBox[i] == j) {
                 if (Select_Item == i) {
                     DrawBox(215, 65 + i * 30 - 5, 385, 65 + i * 30 + 25, Menu_Cr1, TRUE);
-                    DrawFormatString(220, 65 + i * 30, Menu_Cr2, item[i].Item_name);
+                    DrawFormatString(220, 65 + i * 30, Menu_Cr2, item[j].Item_name);
                 }
                 else {
-                    DrawFormatString(220, 65 + i * 30, Menu_Cr1, item[i].Item_name);
+                    DrawFormatString(220, 65 + i * 30, Menu_Cr1, item[j].Item_name);
                 }
             }
         }
