@@ -31,7 +31,7 @@ GRAPHDESC graphDescs[] = {
 int GameMode = GameMode_FIELD;
 char keyState[256];
 char old_E_keyState;
-char old_RETURN_keyState;
+char old_RETURN_keyState=-1;
 char old_ESCAPE_keyState=-1;
 int Player_Time = 0;
 int MENU_Time = 0;
@@ -42,8 +42,8 @@ int old_Player_X = Player_X;
 int old_Player_Y = Player_Y;
 int Select_Menu_Num = 0;
 int Select_Dire_Num = 0;
-int Select_Item=0;
-std::vector<int> ItemBox = {0,1,2,3,4};
+int Select_Item=0; 
+std::vector<int> ItemBox = {0,1,2,3,4}; //もちもの
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ChangeWindowMode(TRUE);
     SetGraphMode(600, 500, 32);
@@ -100,13 +100,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         }
         if (GameMode == GameMode_MENU) {
             DRAW_FIELD();
-            if (Selected_Menu<0) {
+            if (Selected_Menu<0) {//メニューを選んでいないとき
                 MENU_MODE();
             }
-            else if(Selected_Menu==MenuType_DOOR) {
+            else if(Selected_Menu==MenuType_DOOR) {//"とびら"を選んだとき
                 SELECT_DIRE(Select_Menu_Num);
             }
-            else if (Selected_Menu==MenuType_Item) {
+            else if (Selected_Menu==MenuType_Item) {//"どうぐ"を選んだとき
                 Item_Select();
             }
         }
@@ -283,7 +283,7 @@ void SELECT_DIRE(int Selected_Menu_Num) {
                 if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
                     Selected_Menu = FALSE;
                     Select_Menu_Num = 0;
-                    
+                    Selected_Menu = -1;
                     switch (Select_Dire_Num)
                     {
                     case Dire_N:
