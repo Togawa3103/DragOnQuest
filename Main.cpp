@@ -7,43 +7,11 @@
 #include "Enum.h"
 #include "Struct.h"
 #include "Declare.h"
-#define MAP_HEIGHT 10
-#define MAP_WIDTH 12
+#define MAP_HEIGHT 50
+#define MAP_WIDTH 52
 #define FPS 144
 
-CELLDESC cellDescs[] = {
-    {0,0,255,FALSE},//CELL_TYPE_WALL
-    {0,255,0,TRUE},//CELL_TYPE_FLOOR
-    {0,0,0,FALSE},//CELL_TYPE_DOOR
-    {255,0,0,FALSE}//CELL_TYPE_PLAYER
-};
 
-//int Player_H, WALL_H, FLOOR_H;
-
-GRAPHDESC graphDescs[] = {
-    {"wall.bmp",},//GRAPH_TYPE_WALL,
-    {"floor.bmp",},//GRAPH_TYPE_FLOOR,
-    {"door.bmp",},//GRAPH_TYPE_DOOR,
-    {"Player.bmp",},//GRAPH_TYPE_PLAYER,
-    {"Player_turn.bmp"},//GRAPH_TYPE_PLAYER2,
-};
-
-int GameMode = GameMode_FIELD;
-char keyState[256];
-char old_E_keyState;
-char old_RETURN_keyState=-1;
-char old_ESCAPE_keyState=-1;
-int Player_Time = 0;
-int MENU_Time = 0;
-int PlayerCount = 0;
-int Player_X = 4;
-int Player_Y = 4;
-int old_Player_X = Player_X;
-int old_Player_Y = Player_Y;
-int Select_Menu_Num = 0;
-int Select_Dire_Num = 0;
-int Select_Item=0; 
-std::vector<int> ItemBox = {0,1,2,4}; //もちもの
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ChangeWindowMode(TRUE);
     SetGraphMode(600, 500, 32);
@@ -95,10 +63,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     clock_t end = clock();
     haveKey = TRUE;
     while (TRUE) {
+        GetHitKeyStateAll(keyState);
         if (GameMode == GameMode_FIELD) {
             FIELD_MODE();
         }
-        if (GameMode == GameMode_MENU) {
+        else if (GameMode == GameMode_MENU) {
             DRAW_FIELD();
             if (Selected_Menu<0) {//メニューを選んでいないとき
                 MENU_MODE();
@@ -109,17 +78,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             else if (Selected_Menu==MenuType_Item) {//"どうぐ"を選んだとき
                 Item_Select();
             }
+            else if (Selected_Menu==MenuType_STATUS) {//"つよさ"を選んだとき
+                STATUS_SHOW();
+            }
         }
         clock_t now = clock();
         double looptime = now- end;
-        if (looptime<mFPS) {
-            
+        if (looptime<mFPS) {            
             Sleep(mFPS-looptime);
-            end = clock();
         }
-        
+        old_E_keyState = keyState[KEY_INPUT_E];
+        old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+        old_ESCAPE_keyState = keyState[KEY_INPUT_RETURN];
         ScreenFlip();
         ClearDrawScreen();
+        end = clock();
     }
     WaitKey();      // キー入力待ち
     DxLib_End();    // DXライブラリ終了処理
@@ -132,20 +105,19 @@ void MENU_MODE() {
     DrawBox(450, 10, 590, 200, Menu_Cr1, TRUE);
     DrawBox(460, 20, 580, 190, Menu_Cr2, TRUE);
     if (Player_Time == 0) {
-        GetHitKeyStateAll(keyState);
         if (keyState[KEY_INPUT_S]) {
             Select_Menu_Num = (Select_Menu_Num + 1) % (MenuType_MAX);
             Player_Time = Player_Time + mFPS;
         }
         if (keyState[KEY_INPUT_W]) {
-            Select_Menu_Num = (Select_Menu_Num + 3) % (MenuType_MAX);
+            Select_Menu_Num = (Select_Menu_Num + MenuType_MAX-1) % (MenuType_MAX);
             Player_Time = Player_Time + mFPS;
         }
         if (keyState[KEY_INPUT_E] && !old_E_keyState) {
             GameMode = GameMode_FIELD;
             Player_Time = Player_Time + mFPS;
         }
-        old_E_keyState = keyState[KEY_INPUT_E];
+        
 
         if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
             Selected_Menu = Select_Menu_Num;
@@ -155,15 +127,21 @@ void MENU_MODE() {
             Select_Menu_Num = 0;
             GameMode = GameMode_FIELD;
         }
-        old_ESCAPE_keyState = keyState[KEY_INPUT_ESCAPE];
-        old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+     
     }
-        DrawBox(450, 10, 590, 200, Menu_Cr1, TRUE);
-        DrawBox(460, 20, 580, 190, Menu_Cr2, TRUE);
+        DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+        DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
         for (int i = 0; i < MenuType_MAX; i++) {
             if (Select_Menu_Num == i) {
-                DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
-                DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
+                if (i==MenuType_SEARCH) {
+                    DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 80, menu[i].y + 20, Menu_Cr1, TRUE);
+                    DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
+                }
+                else {
+                    DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
+                    DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
+                }
+
             }
             else {
                 DrawFormatString(menu[i].x, menu[i].y, Menu_Cr1, menu[i].name);
@@ -183,7 +161,7 @@ void FIELD_MODE() {
     int Next_X=Player_X;
     int Next_Y=Player_Y;
     if (Player_Time == 0) {
-        GetHitKeyStateAll(keyState);
+        
         if (keyState[KEY_INPUT_W]) {
             
             if (canmove[Player_Y-1][Player_X]) {
@@ -216,7 +194,7 @@ void FIELD_MODE() {
             Player_Time = Player_Time + mFPS;
 
         }
-        old_E_keyState = keyState[KEY_INPUT_E];
+        
 
         if (Player_X != old_Player_X || Player_Y != old_Player_Y) {
             Player_Time = Player_Time + mFPS;
@@ -255,12 +233,12 @@ void SELECT_DIRE(int Selected_Menu_Num) {
     unsigned int Menu_Cr2 = GetColor(0, 0, 0);
     int Select_Menu = Selected_Menu_Num;
     
-    old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+    
     switch (Select_Menu)
     {
     case MenuType_DOOR:
             if (Player_Time == 0) {
-                GetHitKeyStateAll(keyState);
+                
                 if (keyState[KEY_INPUT_W]) {
                     Select_Dire_Num = Dire_N;
                 }
@@ -278,7 +256,7 @@ void SELECT_DIRE(int Selected_Menu_Num) {
                     Select_Dire_Num = 0;
 
                 }
-                old_ESCAPE_keyState = keyState[KEY_INPUT_ESCAPE];
+                
 
                 if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
                     Selected_Menu = FALSE;
@@ -291,6 +269,7 @@ void SELECT_DIRE(int Selected_Menu_Num) {
                             canmove[Player_Y - 1][Player_X] = TRUE;
                             map[Player_Y - 1][Player_X] = map[Player_Y][Player_X];
                             GameMode = GameMode_FIELD;
+                            
                         }
                         else {
                             GameMode = GameMode_FIELD;
@@ -333,11 +312,13 @@ void SELECT_DIRE(int Selected_Menu_Num) {
                     }
                     Select_Dire_Num = 0;
                 }
-                old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+                
                 
             }
-            DrawBox(450, 250, 590, 400, Menu_Cr1, TRUE);
-            DrawBox(460, 260, 580, 390, Menu_Cr2, TRUE);
+            
+            
+            DrawBox(450, 260, 590, 410, Menu_Cr1, TRUE);
+            DrawBox(460, 270, 580, 400, Menu_Cr2, TRUE);
             for (int i = 0; i < Dire_MAX; i++) {
                 if (i == Select_Dire_Num) {
                     DrawBox(dire[i].x - 10, dire[i].y - 10, dire[i].x + 30, dire[i].y + 20, Menu_Cr1, TRUE);
@@ -347,11 +328,8 @@ void SELECT_DIRE(int Selected_Menu_Num) {
                     DrawFormatString(dire[i].x, dire[i].y, Menu_Cr1, dire[i].Dire);
                 }
             }
-            if (GameMode == GameMode_FIELD) {
-                break;
-            }
-            DrawBox(450, 10, 590, 200, Menu_Cr1, TRUE);
-            DrawBox(460, 20, 580, 190, Menu_Cr2, TRUE);
+            DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+            DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
             for (int i = 0; i < MenuType_MAX; i++) {
                 if (Select_Menu_Num == i) {
                     DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
@@ -367,7 +345,7 @@ void SELECT_DIRE(int Selected_Menu_Num) {
             if (Player_Time > 200) {
                 Player_Time = 0;
             }
-           
+            break;
     }
 
 }
@@ -376,7 +354,7 @@ void Item_Select() {
     unsigned int Menu_Cr2 = GetColor(0, 0, 0);
     old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
     if (Player_Time == 0) {
-        GetHitKeyStateAll(keyState);
+        
         if (keyState[KEY_INPUT_S]) {
             Select_Item = (Select_Item + 1) % (ItemBox.size());
             Player_Time = Player_Time + mFPS;
@@ -400,20 +378,72 @@ void Item_Select() {
     DrawBox(200, 50, 400, 450, Menu_Cr1, TRUE);
     DrawBox(210, 60, 390, 440, Menu_Cr2, TRUE);
     for (int i = 0; i < ItemBox.size(); i++) {
-        for (int j = 0; j < Item_Num_Max; j++) {
-            if (ItemBox[i] == j) {
-                if (Select_Item == i) {
-                    DrawBox(215, 65 + i * 30 - 5, 385, 65 + i * 30 + 25, Menu_Cr1, TRUE);
-                    DrawFormatString(220, 65 + i * 30, Menu_Cr2, item[j].Item_name);
-                }
-                else {
-                    DrawFormatString(220, 65 + i * 30, Menu_Cr1, item[j].Item_name);
-                }
-            }
+        if (Select_Item == i) {
+            DrawBox(215, 65 + i * 30 - 5, 385, 65 + i * 30 + 25, Menu_Cr1, TRUE);
+            DrawFormatString(220, 65 + i * 30, Menu_Cr2, item[ItemBox[i]].Item_name);
+        }
+        else {
+            DrawFormatString(220, 65 + i * 30, Menu_Cr1, item[ItemBox[i]].Item_name);
         }
     }
-    DrawBox(450, 10, 590, 200, Menu_Cr1, TRUE);
-    DrawBox(460, 20, 580, 190, Menu_Cr2, TRUE);
+    DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+    DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
+    for (int i = 0; i < MenuType_MAX; i++) {
+        if (Select_Menu_Num == i) {
+            DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
+            DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
+        }
+        else {
+            DrawFormatString(menu[i].x, menu[i].y, Menu_Cr1, menu[i].name);
+        }
+    }
+    if (Player_Time != 0) {
+        Player_Time = Player_Time + mFPS;
+    }
+    if (Player_Time > 200) {
+        Player_Time = 0;
+    }
+
+
+}
+
+void STATUS_SHOW() {
+    unsigned int Menu_Cr1 = GetColor(255, 255, 255);
+    unsigned int Menu_Cr2 = GetColor(0, 0, 0);
+    old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+    if (Player_Time == 0) {
+        
+        if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
+            Selected_Menu = -1;
+            Select_Menu_Num = 0;
+            GameMode = GameMode_FIELD;
+        }
+        if (keyState[KEY_INPUT_ESCAPE]) {
+            Selected_Menu = -1;
+            Select_Menu_Num = 0;
+            GameMode = GameMode_FIELD;
+        }
+        old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
+
+    }
+    DrawBox(200, 50, 400, 400, Menu_Cr1, TRUE);
+    DrawBox(210, 60, 390, 390, Menu_Cr2, TRUE);
+    for (int i = 0; i < STATUS_MAX; i++) {
+        DrawFormatString(220, 65 + i * 30, Menu_Cr1, status[i].status_name);
+    }
+    DrawFormatString(350, 65 + 0 * 30, Menu_Cr1, "%d",player_status[Player_Lv - 1].MAXHP);
+    DrawFormatString(350, 65 + 1 * 30, Menu_Cr1, "%d", HP);
+    DrawFormatString(350, 65 + 2 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].MAXMP);
+    DrawFormatString(350, 65 + 3 * 30, Menu_Cr1, "%d", MP);
+    DrawFormatString(350, 65 + 4 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].ATTACK);
+    DrawFormatString(350, 65 + 5 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].DEFENSE);
+    DrawFormatString(350, 65 + 6 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].SPEED);
+    DrawFormatString(350, 65 + 7 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].WISE);
+    DrawFormatString(350, 65 + 8 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].MAGICDEF);
+    DrawFormatString(350, 65 + 9 * 30, Menu_Cr1, "%d", Gold);
+    DrawFormatString(350, 65 + 10 * 30, Menu_Cr1, "%d", Exp);
+    DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+    DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
     for (int i = 0; i < MenuType_MAX; i++) {
         if (Select_Menu_Num == i) {
             DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
