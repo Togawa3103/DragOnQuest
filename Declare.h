@@ -11,6 +11,8 @@ float mFPS = 1000.f / FPS;
 int Selected_Menu = -1;
 bool haveKey = FALSE;
 
+int MAP_NUM=0;
+
 int GameMode = GameMode_FIELD;
 char keyState[256];
 char old_E_keyState;
@@ -28,11 +30,14 @@ int Select_Dire_Num = 0;
 int Select_Item = 0;
 int HP = 10;
 int MP = 0;
-int Player_Lv = 2;
+int Player_Lv = 1;
 int Gold = 0;
 int Exp = 0;
-std::vector<int> ItemBox = { 0,1,3,4 }; //‚à‚¿‚à‚Ì
-
+std::vector<int> ItemBox = { 0,1,2,3,4 }; //‚à‚¿‚à‚Ì
+int Screen_x = Player_X;
+int Screen_y = Player_Y;
+int Move_Count_X=0;
+int Move_Count_Y = 0;
 
 void Wait(int start, int end);
 void MENU_MODE();
@@ -41,3 +46,5 @@ void DRAW_FIELD();
 void SELECT_DIRE(int);
 void Item_Select();
 void STATUS_SHOW();
+void LOAD_MAP(const char* map_name);
+void DRAW_FIELD_CAMERA();

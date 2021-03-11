@@ -59,7 +59,7 @@ enum {
 enum {
     Item_Herb,//‚â‚­‚»‚¤
     Item_Key,//‚©‚¬
-    Item_CapperSword,//"‚Ç‚¤‚Ì‚Â‚é‚¬"
+    Item_CupperSword,//"‚Ç‚¤‚Ì‚Â‚é‚¬"
     Item_Meil,//"‚©‚í‚Ì‚æ‚ë‚¢"
     Item_unchi,//"‚¤‚ñ‚¿"
     Item_Num_Max,

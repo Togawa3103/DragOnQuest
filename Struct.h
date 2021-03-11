@@ -46,6 +46,7 @@ typedef struct {
 typedef struct {
     const char* status_name;
 }STATUS;
+
 DIRE dire[] = {
     {510,280,"–k"},
     {550,325,"“Œ"},
