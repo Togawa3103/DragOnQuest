@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         graphDescs[i].Graph_Handle = LoadGraph(graphDescs[i].Graph_Name);
     }
     clock_t end = clock();
-    haveKey = FALSE;
+    haveKey =TRUE;
     ClearDrawScreen();
     while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0) {
         GetHitKeyStateAll(keyState);
@@ -549,9 +549,11 @@ void DRAW_FIELD_CAMERA() {
     if (Screen_x>8&&Player_X>old_Player_X) {
         Screen_x = 8;
         Move_Count_X++;
-    }else if (Screen_x < 3 && Player_X < old_Player_X&&!(Player_X<3)) {
+    }else if (Screen_x < 3 && Player_X < old_Player_X) {
         Screen_x = 3;
-        Move_Count_X--;
+        if (Move_Count_X>0) {
+            Move_Count_X--;
+        }
     }
 
     if (Player_Y > old_Player_Y) {
@@ -560,13 +562,15 @@ void DRAW_FIELD_CAMERA() {
     if (Player_Y< old_Player_Y) {
         Screen_y--;
     }
-    if (Screen_y > 8 && Player_Y > old_Player_Y) {
-        Screen_y = 8;
+    if (Screen_y > 7 && Player_Y > old_Player_Y) {
+        Screen_y = 7;
         Move_Count_Y++;
     }
-    else if (Screen_y < 5 && Player_Y < old_Player_Y && !(Player_Y <3)) {
-        Screen_y = 5;
-        Move_Count_Y--;
+    else if (Screen_y < 4 && Player_Y < old_Player_Y ) {
+        Screen_y = 4;
+        if (Move_Count_Y > 0) {
+            Move_Count_Y--;
+        }
     }
         
 
