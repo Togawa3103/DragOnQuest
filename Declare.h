@@ -29,7 +29,7 @@ int Select_Menu_Num = 0;
 int Select_Dire_Num = 0;
 int Select_Item = 0;
 int HP = 10;
-int MP = 0;
+int MP = 5;
 int Player_Lv = 1;
 int Gold = 0;
 int Exp = 0;
@@ -38,6 +38,9 @@ int Screen_x = Player_X;
 int Screen_y = Player_Y;
 int Move_Count_X=0;
 int Move_Count_Y = 0;
+
+Player_STATUS now_player_status = (player_status[Player_Lv - 1]);
+int Player_Status[STATUS_MAX];
 
 void Wait(int start, int end);
 void MENU_MODE();
@@ -48,3 +51,4 @@ void Item_Select();
 void STATUS_SHOW();
 void LOAD_MAP(const char* map_name);
 void DRAW_FIELD_CAMERA();
+void Updata_Status(int Player_Lv);

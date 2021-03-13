@@ -34,6 +34,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     BITMAPINFOHEADER bmih;
     fread(&bmih, sizeof BITMAPINFOHEADER, 1, pFile);
     
+    
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
 
@@ -212,13 +213,13 @@ void FIELD_MODE() {
     DRAW_FIELD_CAMERA();
     
     if (map[Player_Y][Player_X]==CELL_TYPE_STEPS) {
-        for (int i = 0; i < map_data[MAP_NUM].toMap_Num.size(); i++) {
-            if (Player_X == map_data[MAP_NUM].Start_X[i] && Player_Y == map_data[MAP_NUM].Start_Y[i]) {
-                MAP_NUM = map_data[MAP_NUM].toMap_Num[i];
+        for (int i = 0; i < map_data[MAP_NUM].map_info.size(); i++) {
+            if (Player_X == map_data[MAP_NUM].map_info[i].Start_X && Player_Y == map_data[MAP_NUM].map_info[i].Start_Y) {
+                MAP_NUM = map_data[MAP_NUM].map_info[i].toMap_Num;
                 File_Name = map_data[MAP_NUM].Map_Name;
                 LOAD_MAP(File_Name);
-                Player_X = map_data[MAP_NUM].Start_X[i];
-                Player_Y = map_data[MAP_NUM].Start_Y[i];
+                Player_X = map_data[MAP_NUM].map_info[i].Start_X;
+                Player_Y = map_data[MAP_NUM].map_info[i].Start_Y;
                 Move_Count_X = 0;
                 Move_Count_Y = 0;
             }
@@ -436,12 +437,11 @@ void STATUS_SHOW() {
     unsigned int Menu_Cr1 = GetColor(255, 255, 255);
     unsigned int Menu_Cr2 = GetColor(0, 0, 0);
     old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
-    Player_STATUS* now_player_status = &(player_status[Player_Lv-1]);
-    now_player_status->HP = HP;
-    now_player_status->MP = MP;
-    now_player_status->EXP = Exp;
-    now_player_status->GOLD = Gold;
-
+    Updata_Status(Player_Lv);
+    
+    int* p;
+    p = &(now_player_status.MAXHP);
+    
     if (Player_Time == 0) {
         
         if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
@@ -461,18 +461,23 @@ void STATUS_SHOW() {
     DrawBox(210, 60, 390, 390, Menu_Cr2, TRUE);
     for (int i = 0; i < STATUS_MAX; i++) {
         DrawFormatString(220, 65 + i * 30, Menu_Cr1, status[i].status_name);
+        DrawFormatString(350, 65 + i * 30, Menu_Cr1, "%d", *(p+i));
     }
-    DrawFormatString(350, 65 + 0 * 30, Menu_Cr1, "%d",now_player_status[Player_Lv - 1].MAXHP);
-    DrawFormatString(350, 65 + 1 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv-1].HP);
-    DrawFormatString(350, 65 + 2 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].MAXMP);
-    DrawFormatString(350, 65 + 3 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv-1].MP);
-    DrawFormatString(350, 65 + 4 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].ATTACK);
-    DrawFormatString(350, 65 + 5 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].DEFENSE);
-    DrawFormatString(350, 65 + 6 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].SPEED);
-    DrawFormatString(350, 65 + 7 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].WISE);
-    DrawFormatString(350, 65 + 8 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv - 1].MAGICDEF);
-    DrawFormatString(350, 65 + 9 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv-1].GOLD);
-    DrawFormatString(350, 65 + 10 * 30, Menu_Cr1, "%d", now_player_status[Player_Lv-1].EXP);
+    
+
+    /*
+    DrawFormatString(350, 65 + 0 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].MAXHP);
+    DrawFormatString(350, 65 + 1 * 30, Menu_Cr1, "%d", player_status[Player_Lv-1].HP);
+    DrawFormatString(350, 65 + 2 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].MAXMP);
+    DrawFormatString(350, 65 + 3 * 30, Menu_Cr1, "%d", player_status[Player_Lv-1].MP);
+    DrawFormatString(350, 65 + 4 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].ATTACK);
+    DrawFormatString(350, 65 + 5 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].DEFENSE);
+    DrawFormatString(350, 65 + 6 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].SPEED);
+    DrawFormatString(350, 65 + 7 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].WISE);
+    DrawFormatString(350, 65 + 8 * 30, Menu_Cr1, "%d", player_status[Player_Lv - 1].MAGICDEF);
+    DrawFormatString(350, 65 + 9 * 30, Menu_Cr1, "%d", player_status[Player_Lv-1].GOLD);
+    DrawFormatString(350, 65 + 10 * 30, Menu_Cr1, "%d", player_status[Player_Lv-1].EXP);
+    */
     DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
     DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
     for (int i = 0; i < MenuType_MAX; i++) {
@@ -586,4 +591,11 @@ void DRAW_FIELD_CAMERA() {
         DrawExtendGraph((Player_X - Move_Count_X) * 50, (Player_Y-Move_Count_Y) * 50, (Player_X- Move_Count_X) * 50 + 50, (Player_Y-Move_Count_Y) * 50 + 50, graphDescs[GRAPH_TYPE_PLAYER2].Graph_Handle, TRUE);
     }
 
+}
+
+void Updata_Status(int Player_Lv) {
+    now_player_status.HP = HP;
+    now_player_status.MP = MP;
+    now_player_status.GOLD = Gold;
+    now_player_status.EXP = Exp;
 }
