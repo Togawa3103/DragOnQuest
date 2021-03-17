@@ -33,13 +33,13 @@ int MP = 5;
 int Player_Lv = 1;
 int Gold = 0;
 int Exp = 0;
-std::vector<int> ItemBox = { 0,1,2,3,4 }; //‚à‚¿‚à‚Ì
+std::vector<int> ItemBox = { 0,2,3,4 }; //‚à‚¿‚à‚Ì
 int Screen_x = Player_X;
 int Screen_y = Player_Y;
 int Move_Count_X=0;
 int Move_Count_Y = 0;
 
-Player_STATUS now_player_status = (player_status[Player_Lv - 1]);
+PLAYER_STATUS now_player_status = (player_status[Player_Lv - 1]);
 int Player_Status[STATUS_MAX];
 
 void Wait(int start, int end);

@@ -67,9 +67,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         graphDescs[i].Graph_Handle = LoadGraph(graphDescs[i].Graph_Name);
     }
     clock_t end = clock();
-    haveKey =TRUE;
+    haveKey =FALSE;
     ClearDrawScreen();
     while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0) {
+        Updata_Status(Player_Lv);
         GetHitKeyStateAll(keyState);
         if (GameMode == GameMode_FIELD) {
             FIELD_MODE();
@@ -80,13 +81,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 MENU_MODE();
             }
             else if(Selected_Menu==MenuType_DOOR) {//"‚Æ‚Ñ‚ç"‚ð‘I‚ñ‚¾‚Æ‚«
-                SELECT_DIRE(Select_Menu_Num);
+                SELECT_DIRE(Selected_Menu);
             }
             else if (Selected_Menu==MenuType_Item) {//"‚Ç‚¤‚®"‚ð‘I‚ñ‚¾‚Æ‚«
                 Item_Select();
             }
             else if (Selected_Menu==MenuType_STATUS) {//"‚Â‚æ‚³"‚ð‘I‚ñ‚¾‚Æ‚«
                 STATUS_SHOW();
+            }
+            else if (Selected_Menu==MenuType_SEARCH) {
+                SELECT_DIRE(Selected_Menu);
             }
         }
         clock_t now = clock();
@@ -259,120 +263,248 @@ void SELECT_DIRE(int Selected_Menu_Num) {
     switch (Select_Menu)
     {
     case MenuType_DOOR:
-            if (Player_Time == 0) {
-                
-                if (keyState[KEY_INPUT_W]) {
-                    Select_Dire_Num = Dire_N;
-                }
-                if (keyState[KEY_INPUT_D]) {
-                    Select_Dire_Num = Dire_E;
-                }
-                if (keyState[KEY_INPUT_S]) {
-                    Select_Dire_Num = Dire_S;
-                }
-                if (keyState[KEY_INPUT_A]) {
-                    Select_Dire_Num = Dire_W;
-                }
-                if (keyState[KEY_INPUT_ESCAPE]&&!old_ESCAPE_keyState) {
-                    Selected_Menu = -1;
-                    Select_Dire_Num = 0;
+        if (Player_Time == 0) {
 
-                }
-                
+            if (keyState[KEY_INPUT_W]) {
+                Select_Dire_Num = Dire_N;
+            }
+            if (keyState[KEY_INPUT_D]) {
+                Select_Dire_Num = Dire_E;
+            }
+            if (keyState[KEY_INPUT_S]) {
+                Select_Dire_Num = Dire_S;
+            }
+            if (keyState[KEY_INPUT_A]) {
+                Select_Dire_Num = Dire_W;
+            }
+            if (keyState[KEY_INPUT_ESCAPE] && !old_ESCAPE_keyState) {
+                Selected_Menu = -1;
+                Select_Dire_Num = 0;
 
-                if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
-                    Selected_Menu = FALSE;
-                    Select_Menu_Num = 0;
-                    Selected_Menu = -1;
-                    if (haveKey) {
-                        switch (Select_Dire_Num)
-                        {
-                        case Dire_N:
-                            if (map[Player_Y - 1][Player_X] == CELL_TYPE_DOOR) {
-                                canmove[Player_Y - 1][Player_X] = TRUE;
-                                map[Player_Y - 1][Player_X] = map[Player_Y][Player_X];
-                                GameMode = GameMode_FIELD;
+            }
 
-                            }
-                            else {
-                                GameMode = GameMode_FIELD;
-                                break;
-                            }
 
-                        case Dire_E:
-                            if (map[Player_Y][Player_X + 1] == CELL_TYPE_DOOR) {
-                                canmove[Player_Y][Player_X + 1] = TRUE;
-                                map[Player_Y][Player_X + 1] = map[Player_Y][Player_X];
-                                GameMode = GameMode_FIELD;
+            if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
+                Selected_Menu = FALSE;
+                Select_Menu_Num = 0;
+                Selected_Menu = -1;
+                if (haveKey) {
+                    switch (Select_Dire_Num)
+                    {
+                    case Dire_N:
+                        if (map[Player_Y - 1][Player_X] == CELL_TYPE_DOOR) {
+                            for (int i = 0; i < ItemBox.size(); i++) {
+                                if (ItemBox[i] == Item_Key) {
+                                    ItemBox.erase(ItemBox.begin() + i);
+                                }
                             }
-                            else {
-                                GameMode = GameMode_FIELD;
-                                break;
-                            }
-
-                        case Dire_S:
-                            if (map[Player_Y + 1][Player_X] == CELL_TYPE_DOOR) {
-                                canmove[Player_Y + 1][Player_X] = TRUE;
-                                map[Player_Y + 1][Player_X] = map[Player_Y][Player_X];
-                                GameMode = GameMode_FIELD;
-                            }
-                            else {
-                                GameMode = GameMode_FIELD;
-                                break;
-                            }
-
-                        case Dire_W:
-                            if (map[Player_Y][Player_X - 1] == CELL_TYPE_DOOR) {
-                                canmove[Player_Y][Player_X - 1] = TRUE;
-                                map[Player_Y][Player_X - 1] = map[Player_Y][Player_X];
-                                GameMode = GameMode_FIELD;
-                            }
-                            else {
-                                GameMode = GameMode_FIELD;
-                                break;
-                            }
+                            canmove[Player_Y - 1][Player_X] = TRUE;
+                            map[Player_Y - 1][Player_X] = map[Player_Y][Player_X];
+                            GameMode = GameMode_FIELD;
 
                         }
-                        Select_Dire_Num = 0;
+                        else {
+                            GameMode = GameMode_FIELD;
+                            break;
+                        }
+
+                    case Dire_E:
+                        if (map[Player_Y][Player_X + 1] == CELL_TYPE_DOOR) {
+                            for (int i = 0; i < ItemBox.size(); i++) {
+                                if (ItemBox[i] == Item_Key) {
+                                    ItemBox.erase(ItemBox.begin() + i);
+                                }
+                            }
+                            canmove[Player_Y][Player_X + 1] = TRUE;
+                            map[Player_Y][Player_X + 1] = map[Player_Y][Player_X];
+                            GameMode = GameMode_FIELD;
+                        }
+                        else {
+                            GameMode = GameMode_FIELD;
+                            break;
+                        }
+
+                    case Dire_S:
+                        if (map[Player_Y + 1][Player_X] == CELL_TYPE_DOOR) {
+                            for (int i = 0; i < ItemBox.size(); i++) {
+                                if (ItemBox[i] == Item_Key) {
+                                    ItemBox.erase(ItemBox.begin() + i);
+                                }
+                            }
+                            canmove[Player_Y + 1][Player_X] = TRUE;
+                            map[Player_Y + 1][Player_X] = map[Player_Y][Player_X];
+                            GameMode = GameMode_FIELD;
+                        }
+                        else {
+                            GameMode = GameMode_FIELD;
+                            break;
+                        }
+
+                    case Dire_W:
+                        if (map[Player_Y][Player_X - 1] == CELL_TYPE_DOOR) {
+                            for (int i = 0; i < ItemBox.size();i++) {
+                                if (ItemBox[i]==Item_Key) {
+                                    ItemBox.erase(ItemBox.begin()+i);
+                                }
+                            }
+                            canmove[Player_Y][Player_X - 1] = TRUE;
+                            map[Player_Y][Player_X - 1] = map[Player_Y][Player_X];
+                            GameMode = GameMode_FIELD;
+                        }
+                        else {
+                            GameMode = GameMode_FIELD;
+                            break;
+                        }
+
+                    }
+                    Select_Dire_Num = 0;
+                }
+                else {
+                    Select_Dire_Num = 0;
+                    GameMode = GameMode_FIELD;
+                }
+            }
+        }
+
+
+        DrawBox(450, 260, 590, 410, Menu_Cr1, TRUE);
+        DrawBox(460, 270, 580, 400, Menu_Cr2, TRUE);
+        for (int i = 0; i < Dire_MAX; i++) {
+            if (i == Select_Dire_Num) {
+                DrawBox(dire[i].x - 10, dire[i].y - 10, dire[i].x + 30, dire[i].y + 20, Menu_Cr1, TRUE);
+                DrawFormatString(dire[i].x, dire[i].y, Menu_Cr2, dire[i].Dire);
+            }
+            else {
+                DrawFormatString(dire[i].x, dire[i].y, Menu_Cr1, dire[i].Dire);
+            }
+        }
+        DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+        DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
+        for (int i = 0; i < MenuType_MAX; i++) {
+            if (Select_Menu_Num == i) {
+                DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
+                DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
+            }
+            else {
+                DrawFormatString(menu[i].x, menu[i].y, Menu_Cr1, menu[i].name);
+            }
+        }
+        if (Player_Time != 0) {
+            Player_Time = Player_Time + mFPS;
+        }
+        if (Player_Time > 200) {
+            Player_Time = 0;
+        }
+        break;
+
+    case MenuType_SEARCH:
+        if (Player_Time == 0) {
+
+            if (keyState[KEY_INPUT_W]) {
+                Select_Dire_Num = Dire_N;
+            }
+            if (keyState[KEY_INPUT_D]) {
+                Select_Dire_Num = Dire_E;
+            }
+            if (keyState[KEY_INPUT_S]) {
+                Select_Dire_Num = Dire_S;
+            }
+            if (keyState[KEY_INPUT_A]) {
+                Select_Dire_Num = Dire_W;
+            }
+            if (keyState[KEY_INPUT_ESCAPE] && !old_ESCAPE_keyState) {
+                Selected_Menu = -1;
+                Select_Dire_Num = 0;
+
+            }
+
+
+            if (keyState[KEY_INPUT_RETURN] && !old_RETURN_keyState) {
+                Selected_Menu = FALSE;
+                Select_Menu_Num = 0;
+                Selected_Menu = -1;
+
+                switch (Select_Dire_Num)
+                {
+                case Dire_N:
+                    if (map[Player_Y - 1][Player_X] == CELL_TYPE_TRESURE) {
+                        ItemBox.push_back(Item_Key);
+                        GameMode = GameMode_FIELD;
+
                     }
                     else {
-                        Select_Dire_Num = 0;
+                        GameMode = GameMode_FIELD;
+                        break;
+                    }
+
+                case Dire_E:
+                    if (map[Player_Y][Player_X + 1] == CELL_TYPE_TRESURE) {
+                        ItemBox.push_back(Item_Key);
                         GameMode = GameMode_FIELD;
                     }
+                    else {
+                        GameMode = GameMode_FIELD;
+                        break;
+                    }
+
+                case Dire_S:
+                    if (map[Player_Y + 1][Player_X] == CELL_TYPE_TRESURE) {
+                        ItemBox.push_back(Item_Key);
+                        GameMode = GameMode_FIELD;
+                    }
+                    else {
+                        GameMode = GameMode_FIELD;
+                        break;
+                    }
+
+                case Dire_W:
+                    if (map[Player_Y][Player_X - 1] == CELL_TYPE_TRESURE) {
+                        ItemBox.push_back(Item_Key);
+                        GameMode = GameMode_FIELD;
+                    }
+                    else {
+                        GameMode = GameMode_FIELD;
+                        break;
+                    }
+
                 }
+                Select_Dire_Num = 0;
             }
-            
-            
-            DrawBox(450, 260, 590, 410, Menu_Cr1, TRUE);
-            DrawBox(460, 270, 580, 400, Menu_Cr2, TRUE);
-            for (int i = 0; i < Dire_MAX; i++) {
-                if (i == Select_Dire_Num) {
-                    DrawBox(dire[i].x - 10, dire[i].y - 10, dire[i].x + 30, dire[i].y + 20, Menu_Cr1, TRUE);
-                    DrawFormatString(dire[i].x, dire[i].y, Menu_Cr2, dire[i].Dire);
-                }
-                else {
-                    DrawFormatString(dire[i].x, dire[i].y, Menu_Cr1, dire[i].Dire);
-                }
+        }
+
+
+
+        DrawBox(450, 260, 590, 410, Menu_Cr1, TRUE);
+        DrawBox(460, 270, 580, 400, Menu_Cr2, TRUE);
+        for (int i = 0; i < Dire_MAX; i++) {
+            if (i == Select_Dire_Num) {
+                DrawBox(dire[i].x - 10, dire[i].y - 10, dire[i].x + 30, dire[i].y + 20, Menu_Cr1, TRUE);
+                DrawFormatString(dire[i].x, dire[i].y, Menu_Cr2, dire[i].Dire);
             }
-            DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
-            DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
-            for (int i = 0; i < MenuType_MAX; i++) {
-                if (Select_Menu_Num == i) {
-                    DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 60, menu[i].y + 20, Menu_Cr1, TRUE);
-                    DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
-                }
-                else {
-                    DrawFormatString(menu[i].x, menu[i].y, Menu_Cr1, menu[i].name);
-                }
+            else {
+                DrawFormatString(dire[i].x, dire[i].y, Menu_Cr1, dire[i].Dire);
             }
-            if (Player_Time != 0) {
-                Player_Time = Player_Time + mFPS;
+        }
+        DrawBox(450, 10, 590, 250, Menu_Cr1, TRUE);
+        DrawBox(460, 20, 580, 240, Menu_Cr2, TRUE);
+        for (int i = 0; i < MenuType_MAX; i++) {
+            if (Select_Menu_Num == i) {
+                DrawBox(menu[i].x - 10, menu[i].y - 10, menu[i].x + 80, menu[i].y + 20, Menu_Cr1, TRUE);
+                DrawFormatString(menu[i].x, menu[i].y, Menu_Cr2, menu[i].name);
             }
-            if (Player_Time > 200) {
-                Player_Time = 0;
+            else {
+                DrawFormatString(menu[i].x, menu[i].y, Menu_Cr1, menu[i].name);
             }
-            break;
+        }
+        if (Player_Time != 0) {
+            Player_Time = Player_Time + mFPS;
+        }
+        if (Player_Time > 200) {
+            Player_Time = 0;
+        }
+        break;
     }
+
 
 }
 void Item_Select() {
@@ -437,7 +569,7 @@ void STATUS_SHOW() {
     unsigned int Menu_Cr1 = GetColor(255, 255, 255);
     unsigned int Menu_Cr2 = GetColor(0, 0, 0);
     old_RETURN_keyState = keyState[KEY_INPUT_RETURN];
-    Updata_Status(Player_Lv);
+    
     
     int* p;
     p = &(now_player_status.MAXHP);
@@ -594,8 +726,19 @@ void DRAW_FIELD_CAMERA() {
 }
 
 void Updata_Status(int Player_Lv) {
+    now_player_status = (player_status[Player_Lv - 1]);
     now_player_status.HP = HP;
     now_player_status.MP = MP;
     now_player_status.GOLD = Gold;
     now_player_status.EXP = Exp;
+    int* p;
+    p = &(now_player_status.MAXHP);
+    for (int i = 0; i < STATUS_MAX;i++) {
+        Player_Status[i] = *(p+i);
+    }
+    for (int i = 0; i < ItemBox.size();i++) {
+        if (ItemBox[i]==Item_Key) {
+            haveKey = TRUE;
+        }
+    }
 }

@@ -41,7 +41,7 @@ typedef struct {
     int MAGICDEF;
     int GOLD;
     int EXP;
-}Player_STATUS;
+}PLAYER_STATUS;
 
 typedef struct {
     const char* status_name;
@@ -70,7 +70,7 @@ ITEM item[] = {
     {"‚¤‚ñ‚¿"},
 };
 
-Player_STATUS player_status[] = {
+PLAYER_STATUS player_status[] = {
     {20,-1,0,-1,5,5,5,5,5,-1,-1},//Lv1
     {25,-1,5,-1,5,5,5,5,5,-1,-1},//Lv2
     {23,-1,0,-1,5,5,5,5,5,-1,-1},//Lv3
@@ -96,6 +96,7 @@ CELLDESC cellDescs[] = {
     {0,255,0,TRUE},//CELL_TYPE_FLOOR
     {0,0,0,FALSE},//CELL_TYPE_DOOR
     {232,162,0,TRUE},//CELL_TYPE_STEPS
+    {0,255,255,FALSE},
     {255,0,0,FALSE}//CELL_TYPE_PLAYER
 };
 
@@ -105,6 +106,7 @@ GRAPHDESC graphDescs[] = {
     {"floor.bmp",},//GRAPH_TYPE_FLOOR,
     {"door.bmp",},//GRAPH_TYPE_DOOR,
     {"steps.bmp"},//GRAPH_TYPE_STEPS
+    {"box.bmp"},//GRAPH_TYPE_TRESURE
     {"Player.bmp",},//GRAPH_TYPE_PLAYER,
     {"Player_turn.bmp"},//GRAPH_TYPE_PLAYER2,
 };
